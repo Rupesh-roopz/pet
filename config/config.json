@@ -1,0 +1,16 @@
+{
+    "development": {
+        "username": "root",
+        "password": "password",
+        "database": "pet",
+        "host": "localhost",
+        "dialect": "mysql"
+    },
+    "test": {
+        "username": "root",
+        "password": "password",
+        "database": "pet_test",
+        "host": "localhost",
+        "dialect": "mysql"
+    }
+}

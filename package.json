@@ -1,0 +1,36 @@
+{
+    "name": "project-pet",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "test": "cross-env NODE_ENV=test jest --testTimeout=10000 --runInBand --detectOpenHandles --forceExit",
+        "pretest": "cross-env NODE_ENV=test npm run db:reset",
+        "db:create:test": "cross-env NODE_ENV=test npx sequelize-cli db:create",
+        "db:reset": "npx sequelize-cli db:drop && npx sequelize-cli db:create && npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all"
+    },
+    "jest": {
+        "testEnvironment": "node",
+        "coveragePathIgnorePatterns": [
+            "/node_modules/"
+        ]
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "cors": "^2.8.5",
+        "dotenv": "^10.0.0",
+        "express": "^4.17.2",
+        "jsonwebtoken": "^8.5.1",
+        "morgan": "^1.10.0",
+        "mysql2": "^2.3.3",
+        "sequelize": "^6.12.5",
+        "supertest": "^6.1.6"
+    },
+    "devDependencies": {
+        "cross-env": "^7.0.3",
+        "jest": "^27.4.6",
+        "sequelize-cli": "^6.3.0"
+    }
+}
