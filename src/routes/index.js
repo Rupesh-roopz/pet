@@ -2,17 +2,17 @@ const express = require('express');
 const app = express();
 
 const user = require('./user');
+const dashboard = require('./dashboard')
 const expense = require('./expense');
 const category = require('./catagory');
-const search = require('./search');
 const payment = require('./payment_method');
 
 const router = () => {
     app.use('/user', user);
+    app.use('/dashboard', dashboard);
     app.use('/expense', expense);
     app.use('/category', category);
-    app.use('/search', search);
-    app.use('/paymentMethod', payment);
+    app.use('/payment-method', payment);
 
     return app;
 };

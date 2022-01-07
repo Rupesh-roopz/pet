@@ -17,7 +17,7 @@ describe.only('Expense data API', () => {
     test('Current month existed', async() => {
         const token = await authorisedUser();
         const res = await request(app)
-            .post('/expense/monthly')
+            .post('/dashboard')
             .set('Authorization', 'bearer ' + token)
             .send({
                 monthStartingDate: "2022-01-01 ",
@@ -29,7 +29,7 @@ describe.only('Expense data API', () => {
     test('On successfull expense entry', async() => {
         const token = authorisedToken;
         const res = await request(app)
-            .post('/expense/add')
+            .post('/expense')
             .set('Authorization', 'bearer ' + token)
             .send({
                 date: "2022-01-01",
@@ -44,7 +44,7 @@ describe.only('Expense data API', () => {
     test('Edit expense', async() => {
         const token = authorisedToken;
         const res = await request(app)
-            .put('/expense/edit')
+            .put('/expense')
             .set('Authorization', 'bearer ' + token)
             .send({
                 id: 1,
@@ -60,7 +60,7 @@ describe.only('Expense data API', () => {
     test('Fetch expense', async() => {
         const token = authorisedToken;
         const res = await request(app)
-            .get('/expense/fetch')
+            .get('/expense?from_date=2022-01-01&to_date=2022-01-01')
             .set('Authorization', 'bearer ' + token)
 
         expect(res.status).toBe(200)
@@ -68,7 +68,7 @@ describe.only('Expense data API', () => {
     test('Delete expense', async() => {
         const token = authorisedToken;
         const res = await request(app)
-            .del('/expense/delete?id=1')
+            .del('/expense?id=1')
             .set('Authorization', 'bearer ' + token)
 
         expect(res.status).toBe(200)

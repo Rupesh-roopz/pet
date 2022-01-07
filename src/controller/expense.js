@@ -1,5 +1,6 @@
 const {
     sequelize,
+    Sequelize,
     MonthlyExpense,
     ExpenseData,
     DailyExpense,
@@ -12,123 +13,189 @@ const { presentMonth, month } = require('../helpers/manageDates');
 const { monthlyExpenseValidation } = require('../helpers/validations/monthly');
 const { expenseFormValidation } = require('../helpers/validations/expense');
 const { isCurrentMonth } = require('../helpers/isCurrentMonth');
-
+const { dateValidation } = require('../helpers/validations/date')
 
 const fetchExpenses = async(req, res) => {
     try {
-        const user_id = req.user_id;
-        const { total_expense_month, total_expense_date, current_month } = req.query;
-        if (current_month && !total_expense_date && !total_expense_month) {
-            const currentMonth = presentMonth(current_month);
-            //gettig userId from authorization payload
-            const id = req.user_id;
+        const isValidDate = await dateValidation(req.query);
+        if (isValidDate) {
+            const { from_date, to_date, category_name, payment_method, max_price } = req.query;
+            const user_id = req.user_id;
 
-            const data = await MonthlyExpense.findOne({
-                attributes: ['id'],
-                where: {
-                    user_id: id,
-                    month: currentMonth
-                }
-            })
-            if (data !== null) {
-                res.status(http.SUCCESS)
-                    .json({
-                        data: null,
-                        status: 1,
-                        error_message: null,
-                        success_message: "current month existed"
-                    });
-                return;
-            }
-            throw ({ message: "Current month data not found" })
+            if (from_date && to_date && !category_name && !payment_method, !max_price) {
+                await Date.findAll({
+                    where: {
+                        user_id,
+                        date: {
+                            [Sequelize.Op.between]: [from_date, to_date]
+                        }
+                    },
+                    attributes: ['date'],
+                    include: [{
+                        model: ExpenseData,
+                        attributes: ['id', 'amount', 'description'],
+                        include: [{
+                                model: Date,
+                                // right: true,
+                                attributes: ['date']
+                            },
+                            {
+                                model: PaymentMethod,
+                                attributes: ['paymentMethodName']
 
-        }
-        if (!total_expense_date && !total_expense_month && !current_month) {
-            const data = await ExpenseData.findAll({
-                attributes: ['id', 'amount',
-                    'description'
-                ],
-                where: {
-                    user_id,
-                },
-                include: [{
-                    model: Date,
-                    right: true,
-                    attributes: ['date']
-                }, {
-                    model: PaymentMethod,
-                    attributes: ['paymentMethodName']
-
-                }, {
-                    model: Category,
-                    attributes: ['categoryName']
-                }],
-            })
-            if (data.length) {
-                const result = JSON.stringify(data, null, 2);
-                const parsedResult = JSON.parse(result);
-                const expenses = parsedResult.map(obj => {
-                    return {
-                        id: obj.id,
-                        date: obj.Date.date,
-                        amount: obj.amount,
-                        description: obj.description,
-                        category: obj.Category.categoryName,
-                        paymentMethod: obj.PaymentMethod.paymentMethodName
-                    }
-                })
-                res.status(http.SUCCESS)
-                    .json({
-                        data: expenses,
-                        status: 1,
-                        error_message: null,
-                        success_message: "Total expenses"
-                    });
-                return;
-            }
-            res.status(http.SUCCESS)
-                .json({
-                    data: null,
-                    status: 1,
-                    error_message: null,
-                    success_message: "No expenses added"
-                });
-            return;
-        }
-        if (total_expense_date && !total_expense_month && !current_month) {
-            await Date.findOne({
-                    where: { user_id, date: total_expense_date },
-                    include: { model: DailyExpense }
-                })
-                .then(data => {
-                    const result = JSON.stringify(data, null, 2);
-                    const parsedResult = JSON.parse(result);
-                    if (parsedResult == null)
+                            },
+                            {
+                                model: Category,
+                                attributes: ['categoryName']
+                            }
+                        ]
+                    }]
+                }).then(data => {
+                    if (data.length) {
+                        const result = JSON.stringify(data, null, 2);
+                        const parsedResult = JSON.parse(result);
+                        const expense = parsedResult.map(obj => {
+                            const parsed = JSON.stringify(obj.ExpenseData, null, 4);
+                            const result = JSON.parse(parsed);
+                            console.log(result)
+                            return result.map(expenseObject => {
+                                return ({
+                                    id: expenseObject.id,
+                                    amount: expenseObject.amount,
+                                    description: expenseObject.description,
+                                    date: expenseObject.Date.date,
+                                    paymentMethod: expenseObject.PaymentMethod.paymentMethodName,
+                                    category: expenseObject.Category.categoryName
+                                })
+                            })
+                        })
+                        var merged = [].concat.apply([], expense);
                         return res.status(http.SUCCESS)
                             .json({
-                                data: null,
+                                data: merged,
                                 status: 1,
                                 error_message: null,
-                                success_message: "No expenses added today"
+                                success_message: "expense data between dates"
                             });
-                    const total = parsedResult.DailyExpenses[0].dailyTotalExpense;
-                    res.status(http.SUCCESS).json({
-                        data: total,
-                        status: 1,
-                        error_message: null,
-                        success_message: "Total expense of a day"
-                    });
-                    return;
-                })
-                .catch(err => { throw err });
-        }
-        if (total_expense_month && !total_expense_date && !current_month) {
-            const userSelectedMonth = month(total_expense_month);
+                    }
 
+                    res.status(http.SUCCESS)
+                        .json({
+                            data: null,
+                            status: 1,
+                            error_message: null,
+                            success_message: "'no records found between dates'"
+                        });
+                }).catch((err) => { throw err });
+            }
+
+            if (from_date && to_date && category_name && payment_method && max_price) {
+                await Date.findAll({
+                    where: {
+                        user_id,
+                        date: {
+                            [Sequelize.Op.between]: [from_date, to_date]
+                        }
+                    },
+                    attributes: ['date'],
+                    include: [{
+                        model: ExpenseData,
+                        attributes: ['id', 'amount', 'description'],
+                        where: {
+                            amount: {
+                                [Sequelize.Op.lte]: max_price
+                            }
+                        },
+                        include: [{
+                            model: Date,
+                            right: true,
+                            attributes: ['date']
+                        }, {
+                            model: PaymentMethod,
+                            attributes: ['paymentMethodName'],
+                            where: {
+                                paymentMethodName: payment_method
+                            },
+                            right: true,
+                        }, {
+                            model: Category,
+                            attributes: ['categoryName'],
+                            where: {
+                                categoryName: category_name
+                            },
+                        }]
+                    }]
+                }).then(data => {
+                    if (data.length) {
+                        const result = JSON.stringify(data, null, 2);
+                        const parsedResult = JSON.parse(result);
+                        const expense = parsedResult.map(obj => {
+                            const parsed = JSON.stringify(obj.ExpenseData, null, 4);
+                            const result = JSON.parse(parsed);
+
+                            return result.map(expenseObject => {
+                                return ({
+                                    id: expenseObject.id,
+                                    amount: expenseObject.amount,
+                                    description: expenseObject.description,
+                                    date: expenseObject.Date.date,
+                                    paymentMethod: expenseObject.PaymentMethod.paymentMethodName,
+                                    category: expenseObject.Category.categoryName
+                                })
+                            })
+                        })
+                        var merged = [].concat.apply([], expense);
+                        return res.status(http.SUCCESS)
+                            .json({
+                                data: merged,
+                                status: 1,
+                                error_message: null,
+                                success_message: "expense data between dates"
+                            });
+                    }
+
+                    res.status(http.SUCCESS)
+                        .json({
+                            data: null,
+                            status: 1,
+                            error_message: null,
+                            success_message: "'no records found between dates'"
+                        });
+                }).catch((err) => { throw err });
+            }
+
+        }
+
+    } catch (error) {
+        console.log(error)
+        res.status(http.BAD_REQUEST).json({
+            data: null,
+            status: 0,
+            error_message: error.message,
+            success_message: null
+        });
+    }
+}
+
+
+const fetchCurrentMonth = async(req, res) => {
+    try {
+        //presentMonth function will return current month
+        const currentMonth = presentMonth() + 1;
+        //gettig userId from authorization payload
+        const user_id = req.user_id;
+        const data = await MonthlyExpense.findOne({
+            attributes: ['id'],
+            where: {
+                user_id,
+                month: currentMonth
+            }
+        })
+        if (data !== null) {
             await MonthlyExpense.findOne({
                 where: {
-                    user_id,
-                    month: userSelectedMonth
+                    id: data.id,
+                    user_id
                 },
                 include: {
                     model: Date,
@@ -158,14 +225,14 @@ const fetchExpenses = async(req, res) => {
                 }, {
                     where: {
                         user_id,
-                        month: userSelectedMonth
+                        id: data.id
                     }
                 });
             }).then(async() => {
                 return await MonthlyExpense.findOne({
                     where: {
                         user_id,
-                        month: userSelectedMonth
+                        id: data.id
                     }
                 });
             }).then(data => {
@@ -179,7 +246,10 @@ const fetchExpenses = async(req, res) => {
                 return;
             }).catch((err) => { throw err });
         }
+        throw ({ message: 'current month is not existed' });
+
     } catch (error) {
+        console.log(error)
         res.status(http.BAD_REQUEST).json({
             data: null,
             status: 0,
@@ -187,38 +257,9 @@ const fetchExpenses = async(req, res) => {
             success_message: null
         });
     }
-}
+};
 
-
-// const isCurrentMonthExist = async(req, res) => {
-//     try {
-//         //presentMonth function will return current month
-//         const currentMonth = presentMonth();
-//         //gettig userId from authorization payload
-//         const id = req.user_id;
-
-//         const data = await MonthlyExpense.findOne({
-//             attributes: ['id'],
-//             where: {
-//                 user_id: id,
-//                 month: currentMonth
-//             }
-//         })
-//         if (data === null) {
-//             res.status(http.SUCCESS)
-//                 .json({ message: 'current month data not found' });
-//             return;
-//         }
-//         res.status(http.SUCCESS)
-//             .json({ message: 'current month is existed' });
-//         return;
-//     } catch (error) {
-//         console.log(error)
-//         res.status(http.BAD_REQUEST).json(error);
-//     }
-// };
-
-const monthlyExpense = async(req, res) => {
+const addCurrentMonth = async(req, res) => {
     try {
         //Validating client data
         const isValidData = await monthlyExpenseValidation(req.body);
@@ -552,7 +593,8 @@ const deleteExpense = async(req, res) => {
 };
 
 module.exports = {
-    monthlyExpense,
+    addCurrentMonth,
+    fetchCurrentMonth,
     addExpense,
     editExpense,
     fetchExpenses,

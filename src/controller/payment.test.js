@@ -32,7 +32,7 @@ describe('Payment methoad API', () => {
     test('Fetch payment methoad names', async() => {
         const token = await authorisedUser();
         const res = await request(app)
-            .get('/paymentMethod/fetch')
+            .get('/payment-method')
             .set('Authorization', 'bearer ' + token)
         expect(res.statusCode).toEqual(200)
     });
@@ -41,7 +41,7 @@ describe('Payment methoad API', () => {
         const token = await unAuthorisedUser();
 
         const res = await request(app)
-            .get('/paymentMethod/fetch')
+            .get('/payment-method')
             .set('Authorization', 'bearer ' + token)
         expect(res.statusCode).toEqual(403)
     });
@@ -49,7 +49,7 @@ describe('Payment methoad API', () => {
     test('Fetch payment method for authorised users only', async() => {
         const token = authorisedToken;
         const res = await request(app)
-            .get('/paymentMethod/fetch')
+            .get('/payment-method')
             .set('Authorization', 'bearer ' + token)
         expect(res.statusCode).not.toEqual(403)
     });
@@ -57,7 +57,7 @@ describe('Payment methoad API', () => {
     test('Add payment method', async() => {
         const token = authorisedToken;
         const res = await request(app)
-            .post('/paymentMethod/add')
+            .post('/payment-method')
             .set('Authorization', 'bearer ' + token)
             .send({
                 paymentMethodName: 'markety'
@@ -68,7 +68,7 @@ describe('Payment methoad API', () => {
     test('return 409 if payment methoad already exists', async() => {
         const token = authorisedToken;
         const res = await request(app)
-            .post('/paymentMethod/add')
+            .post('/payment-method')
             .set('Authorization', 'bearer ' + token)
             .send({
                 paymentMethodName: 'markety'
@@ -79,7 +79,7 @@ describe('Payment methoad API', () => {
     test('On successfull payment methoad update', async() => {
         const token = authorisedToken;
         const res = await request(app)
-            .put('/paymentMethod/update')
+            .put('/payment-method')
             .set('Authorization', 'bearer ' + token)
             .send({
                 id: 2,
@@ -91,7 +91,7 @@ describe('Payment methoad API', () => {
     test('Should not update if same values', async() => {
         const token = authorisedToken;
         const res = await request(app)
-            .put('/paymentMethod/update')
+            .put('/payment-method')
             .set('Authorization', 'bearer ' + token)
             .send({
                 id: 2,

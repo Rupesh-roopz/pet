@@ -67,7 +67,7 @@ describe('Register user', () => {
 
     test('On successfull profile update', async() => {
         const res = await request(app)
-            .put('/user/profile/update')
+            .put('/user/profile-update')
             .set('Authorization', 'bearer ' + token)
             .send({
                 firstName: 'Mukesh',
@@ -84,7 +84,7 @@ describe('Register user', () => {
 
     test('Should not update if same values ', async() => {
         const res = await request(app)
-            .put('/user/profile/update')
+            .put('/user/profile-update')
             .set('Authorization', 'bearer ' + token)
             .send({
                 firstName: 'Mukesh',

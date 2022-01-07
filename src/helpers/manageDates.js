@@ -6,9 +6,9 @@ const dateComparision = (fromDate, endDate) => {
     const startingDate = new Date(fromDate);
     const endingDate = new Date(endDate);
 
-    if (startingDate > endingDate)
-        return 1;
-    return 0;
+    if ((startingDate < endingDate) || (+startingDate == +endingDate))
+        return 0;
+    return 1;
 
 };
 
