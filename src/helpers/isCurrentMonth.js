@@ -12,7 +12,7 @@ const isCurrentMonth = async(id, user_id) => {
         const parsedResult = JSON.parse(result);
         if (parsedResult == null)
             throw ({
-                errorMessage: 'Expense not exist'
+                message: 'Expense not exist'
             });
         const date = parsedResult.Date.date;
 
@@ -21,7 +21,7 @@ const isCurrentMonth = async(id, user_id) => {
 
         if (currentMonth !== selectedMonth)
             throw ({
-                errorMessage: 'current month expenses can only be change'
+                message: 'current month expenses can only be change'
             });
         return;
     }).catch(err => { throw err });

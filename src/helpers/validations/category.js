@@ -1,15 +1,15 @@
-const categoryValidation = async (req) => {
-	const { categoryName } = req;
-    
-	if((/\d/.test(categoryName)) || categoryName.trim() === '' ) {
-		throw { errorMessage : 'Please enter valid category name' };
-	}
+const categoryValidation = async(req) => {
+    const { categoryName } = req;
 
-	if(categoryName.trim().length < 4 || categoryName.trim().length>15) {
-		throw { errorMessage : 'category name must be greater than 4 letters' };
-	}
+    if ((/\d/.test(categoryName)) || categoryName.trim() === '') {
+        throw { message: 'Please enter valid category name' };
+    }
 
-	return 1;
+    if (categoryName.trim().length < 4 || categoryName.trim().length > 15) {
+        throw { message: 'category name must be greater than 4 letters' };
+    }
+
+    return 1;
 };
 
 module.exports = { categoryValidation };

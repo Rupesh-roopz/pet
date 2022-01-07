@@ -14,34 +14,209 @@ const { expenseFormValidation } = require('../helpers/validations/expense');
 const { isCurrentMonth } = require('../helpers/isCurrentMonth');
 
 
-
-const isCurrentMonthExist = async(req, res) => {
+const fetchExpenses = async(req, res) => {
     try {
-        //presentMonth function will return current month
-        const currentMonth = presentMonth();
-        //gettig userId from authorization payload
-        const id = req.user_id;
+        const user_id = req.user_id;
+        const { total_expense_month, total_expense_date, current_month } = req.query;
+        if (current_month && !total_expense_date && !total_expense_month) {
+            const currentMonth = presentMonth(current_month);
+            //gettig userId from authorization payload
+            const id = req.user_id;
 
-        const data = await MonthlyExpense.findOne({
-            attributes: ['id'],
-            where: {
-                user_id: id,
-                month: currentMonth
+            const data = await MonthlyExpense.findOne({
+                attributes: ['id'],
+                where: {
+                    user_id: id,
+                    month: currentMonth
+                }
+            })
+            if (data !== null) {
+                res.status(http.SUCCESS)
+                    .json({
+                        data: null,
+                        status: 1,
+                        error_message: null,
+                        success_message: "current month existed"
+                    });
+                return;
             }
-        })
-        if (data === null) {
+            throw ({ message: "Current month data not found" })
+
+        }
+        if (!total_expense_date && !total_expense_month && !current_month) {
+            const data = await ExpenseData.findAll({
+                attributes: ['id', 'amount',
+                    'description'
+                ],
+                where: {
+                    user_id,
+                },
+                include: [{
+                    model: Date,
+                    right: true,
+                    attributes: ['date']
+                }, {
+                    model: PaymentMethod,
+                    attributes: ['paymentMethodName']
+
+                }, {
+                    model: Category,
+                    attributes: ['categoryName']
+                }],
+            })
+            if (data.length) {
+                const result = JSON.stringify(data, null, 2);
+                const parsedResult = JSON.parse(result);
+                const expenses = parsedResult.map(obj => {
+                    return {
+                        id: obj.id,
+                        date: obj.Date.date,
+                        amount: obj.amount,
+                        description: obj.description,
+                        category: obj.Category.categoryName,
+                        paymentMethod: obj.PaymentMethod.paymentMethodName
+                    }
+                })
+                res.status(http.SUCCESS)
+                    .json({
+                        data: expenses,
+                        status: 1,
+                        error_message: null,
+                        success_message: "Total expenses"
+                    });
+                return;
+            }
             res.status(http.SUCCESS)
-                .json({ message: 'current month data not found' });
+                .json({
+                    data: null,
+                    status: 1,
+                    error_message: null,
+                    success_message: "No expenses added"
+                });
             return;
         }
-        res.status(http.SUCCESS)
-            .json({ message: 'current month is existed' });
-        return;
+        if (total_expense_date && !total_expense_month && !current_month) {
+            await Date.findOne({
+                    where: { user_id, date: total_expense_date },
+                    include: { model: DailyExpense }
+                })
+                .then(data => {
+                    const result = JSON.stringify(data, null, 2);
+                    const parsedResult = JSON.parse(result);
+                    if (parsedResult == null)
+                        return res.status(http.SUCCESS)
+                            .json({
+                                data: null,
+                                status: 1,
+                                error_message: null,
+                                success_message: "No expenses added today"
+                            });
+                    const total = parsedResult.DailyExpenses[0].dailyTotalExpense;
+                    res.status(http.SUCCESS).json({
+                        data: total,
+                        status: 1,
+                        error_message: null,
+                        success_message: "Total expense of a day"
+                    });
+                    return;
+                })
+                .catch(err => { throw err });
+        }
+        if (total_expense_month && !total_expense_date && !current_month) {
+            const userSelectedMonth = month(total_expense_month);
+
+            await MonthlyExpense.findOne({
+                where: {
+                    user_id,
+                    month: userSelectedMonth
+                },
+                include: {
+                    model: Date,
+                    attributes: [
+                        [sequelize.fn('sum', sequelize.col('amount')), 'total']
+                    ],
+                    include: { model: ExpenseData }
+                },
+                group: ['user_id']
+            }).then(async data => {
+                const result = JSON.stringify(data, null, 2);
+                const parsedResult = JSON.parse(result);
+                if (!parsedResult.Dates.length) {
+                    res.status(http.SUCCESS)
+                        .json({
+                            data: null,
+                            status: 1,
+                            error_message: null,
+                            success_message: "No expenses added on this month"
+                        });
+                    return;
+                }
+                const totalMonthExpense = parsedResult.Dates[0].total;
+                return await MonthlyExpense.update({
+                    monthlyExpense: totalMonthExpense,
+                    monthlyBalance: parsedResult.monthlyEarnings - totalMonthExpense
+                }, {
+                    where: {
+                        user_id,
+                        month: userSelectedMonth
+                    }
+                });
+            }).then(async() => {
+                return await MonthlyExpense.findOne({
+                    where: {
+                        user_id,
+                        month: userSelectedMonth
+                    }
+                });
+            }).then(data => {
+                res.status(http.SUCCESS).json({
+                    data: data,
+                    status: 1,
+                    error_message: null,
+                    success_message: "Total month expense"
+
+                });
+                return;
+            }).catch((err) => { throw err });
+        }
     } catch (error) {
-        console.log(error)
-        res.status(http.BAD_REQUEST).json(error);
+        res.status(http.BAD_REQUEST).json({
+            data: null,
+            status: 0,
+            error_message: error.message,
+            success_message: null
+        });
     }
-};
+}
+
+
+// const isCurrentMonthExist = async(req, res) => {
+//     try {
+//         //presentMonth function will return current month
+//         const currentMonth = presentMonth();
+//         //gettig userId from authorization payload
+//         const id = req.user_id;
+
+//         const data = await MonthlyExpense.findOne({
+//             attributes: ['id'],
+//             where: {
+//                 user_id: id,
+//                 month: currentMonth
+//             }
+//         })
+//         if (data === null) {
+//             res.status(http.SUCCESS)
+//                 .json({ message: 'current month data not found' });
+//             return;
+//         }
+//         res.status(http.SUCCESS)
+//             .json({ message: 'current month is existed' });
+//         return;
+//     } catch (error) {
+//         console.log(error)
+//         res.status(http.BAD_REQUEST).json(error);
+//     }
+// };
 
 const monthlyExpense = async(req, res) => {
     try {
@@ -66,7 +241,7 @@ const monthlyExpense = async(req, res) => {
             }).then(async data => {
                 if (data)
                     throw {
-                        errorMessage: 'Monthly income already exists'
+                        message: 'monthly income already exists'
                     };
                 return await MonthlyExpense.create({
                     user_id,
@@ -77,12 +252,22 @@ const monthlyExpense = async(req, res) => {
                     monthlyBalance
                 });
             }).then(data => {
-                res.status(http.CREATED).json({ data });
+                res.status(http.CREATED).json({
+                    data: data,
+                    status: 1,
+                    error_message: null,
+                    success_message: "monthly earnings added"
+                });
             }).catch(err => { throw err });
         }
     } catch (error) {
         console.log(error)
-        res.status(http.BAD_REQUEST).json(error);
+        res.status(http.BAD_REQUEST).json({
+            data: null,
+            status: 0,
+            error_message: error.message,
+            success_message: null
+        });
     }
 };
 
@@ -195,94 +380,25 @@ const addExpense = async(req, res) => {
                     }
                 });
             }).then(() => {
-                res.sendStatus(http.CREATED);
+                res.status(http.CREATED).json({
+                    data: null,
+                    status: 1,
+                    error_message: null,
+                    success_message: "Expense added"
+                });
             }).catch(err => { throw err });
         }
 
     } catch (error) {
-        console.log(error)
-        res.status(http.BAD_REQUEST).json(error);
+        res.status(http.BAD_REQUEST).json({
+            data: null,
+            status: 0,
+            error_message: error.message,
+            success_message: null
+        });
     }
 };
 
-const totalDayExpense = async(req, res) => {
-    try {
-        const { date } = req.body;
-        const user_id = req.user_id; //gettig userId from authorization payload
-
-        await Date.findOne({
-            where: { user_id, date },
-            include: { model: DailyExpense }
-        }).then(data => {
-            const result = JSON.stringify(data, null, 2);
-            const parsedResult = JSON.parse(result);
-            if (parsedResult == null)
-                return res.status(http.SUCCESS)
-                    .json({ message: 'No Expenses today' });
-            const total = parsedResult.DailyExpenses[0].dailyTotalExpense;
-            res.status(http.SUCCESS).json({ totalDayExpense: total });
-        }).catch(err => { throw err });
-
-    } catch (error) {
-        res.status(http.BAD_REQUEST).json(error);
-    }
-};
-
-//getting monthly total expense with any of the date of that month
-const monthlyTotalExpense = async(req, res) => {
-    try {
-        const { date } = req.body;
-        const user_id = req.user_id;
-        //getting month wrto user seleted date
-        const userSelectedMonth = month(date);
-        console.log(userSelectedMonth)
-        await MonthlyExpense.findOne({
-            where: {
-                user_id,
-                month: userSelectedMonth
-            },
-            include: {
-                model: Date,
-                attributes: [
-                    [sequelize.fn('sum', sequelize.col('amount')), 'total']
-                ],
-                include: { model: ExpenseData }
-            },
-            group: ['user_id']
-        }).then(async data => {
-            const result = JSON.stringify(data, null, 2);
-            const parsedResult = JSON.parse(result);
-            if (!parsedResult.Dates.length) {
-                res.status(http.SUCCESS)
-                    .json({ message: 'No Expenses in this month' });
-                return;
-            }
-            const totalMonthExpense = parsedResult.Dates[0].total;
-            return await MonthlyExpense.update({
-                monthlyExpense: totalMonthExpense,
-                monthlyBalance: parsedResult.monthlyEarnings - totalMonthExpense
-            }, {
-                where: {
-                    user_id,
-                    month: userSelectedMonth
-                }
-            });
-        }).then(async() => {
-            return await MonthlyExpense.findOne({
-                where: {
-                    user_id,
-                    month: userSelectedMonth
-                }
-            });
-        }).then(data => {
-            res.status(http.SUCCESS).json(data);
-            return;
-        }).catch((err) => { throw err });
-
-    } catch (error) {
-        res.status(http.BAD_REQUEST).json(error);
-    }
-};
 
 const editExpense = async(req, res) => {
     try {
@@ -341,7 +457,7 @@ const editExpense = async(req, res) => {
                     });
                 }
                 throw ({
-                    errorMessage: 'not updated! values remains same'
+                    message: 'not updated! values remains same'
                 });
             }).then(async data => {
                 const total = data.dailyTotalExpense;
@@ -351,58 +467,30 @@ const editExpense = async(req, res) => {
             }).then(async data => {
                 if (data[0]) {
                     res.status(http.CREATED)
-                        .json({ message: 'Updated successfully' });
+                        .json({
+                            data: null,
+                            status: 1,
+                            error_message: null,
+                            success_message: "expense updated successfully"
+                        });
                     return;
                 }
                 throw ({
-                    errorMessage: 'not updated! values remains same'
+                    message: 'not updated! values remains same'
                 });
             }).catch(err => { throw err });
         }
     } catch (error) {
         console.log(error)
-        res.status(http.BAD_REQUEST).json(error);
+        res.status(http.BAD_REQUEST).json({
+            data: null,
+            status: 0,
+            error_message: error.message,
+            success_message: null
+        });
     }
 };
 
-const fetchExpenses = async(req, res) => {
-    try {
-        const user_id = req.user_id;
-        const data = await ExpenseData.findAll({
-            attributes: ['id', 'amount',
-                'description'
-            ],
-            where: {
-                user_id,
-            },
-            include: [{
-                model: Date,
-                right: true,
-                attributes: ['date']
-            }, {
-                model: PaymentMethod,
-                attributes: ['paymentMethodName']
-
-            }, {
-                model: Category,
-                attributes: ['categoryName']
-            }],
-        })
-        if (data.length) {
-            const result = JSON.stringify(data, null, 2);
-            const parsedResult = JSON.parse(result);
-            res.status(http.SUCCESS)
-                .json(parsedResult);
-            return;
-        }
-        res.status(http.SUCCESS)
-            .json({ message: 'No records found' });
-        return;
-    } catch (error) {
-        console.log(error)
-        res.status(http.BAD_REQUEST).json(error);
-    }
-};
 
 const deleteExpense = async(req, res) => {
     try {
@@ -431,7 +519,12 @@ const deleteExpense = async(req, res) => {
                     });
                 }
                 res.status(http.ACCEPTED)
-                    .json({ message: 'Expense not deleted' });
+                    .json({
+                        data: null,
+                        status: 1,
+                        error_message: null,
+                        success_message: "expense not deleted"
+                    });
             }).then(async data => {
                 // updating total expense table
                 const total = data.dailyTotalExpense;
@@ -440,20 +533,27 @@ const deleteExpense = async(req, res) => {
                 }, { where: { id: date_id } });
             }).then(() => {
                 return res.status(http.SUCCESS)
-                    .json({ message: 'Expense deleted successfully' });
+                    .json({
+                        data: null,
+                        status: 1,
+                        error_message: null,
+                        success_message: "Expense deleted successfully"
+                    });
             }).catch(err => { throw err });
         }
     } catch (error) {
-        res.status(http.BAD_REQUEST).json(error);
+        res.status(http.BAD_REQUEST).json({
+            data: null,
+            status: 0,
+            error_message: error.message,
+            success_message: null
+        });
     }
 };
 
 module.exports = {
     monthlyExpense,
-    isCurrentMonthExist,
     addExpense,
-    totalDayExpense,
-    monthlyTotalExpense,
     editExpense,
     fetchExpenses,
     deleteExpense

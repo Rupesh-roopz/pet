@@ -26,9 +26,6 @@ const unAuthorisedUser = async() => {
     return unAuthorisedToken
 }
 
-// beforeAll(async() => await Category.sync({ force: true }))
-//     // afterAll( async () => await Category.destroy({ truncate : true}) )
-
 describe('Category API', () => {
     test('Fetch categories', async() => {
         const token = await authorisedUser();
@@ -101,7 +98,7 @@ describe('Category API', () => {
             })
         console.log(res.status)
         expect(res.status).toBe(409)
-        expect(res.body).toHaveProperty('message')
+
     });
 
 })

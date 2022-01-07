@@ -29,15 +29,13 @@ const connection = async() => {
 };
 connection();
 
-// app.listen(port, (error) => {
-//     if (error)
-//         console.log(error);
-//     console.log(`Connected to the server at port ${port}`);
-// });
+app.listen(port, (error) => {
+    if (error)
+        console.log(error);
+    console.log(`Connected to the server at port ${port}`);
+});
 
 
-
-// app.listen(port).then(() => console.log("connected")).catch((e) => console.log(e))
 
 
 

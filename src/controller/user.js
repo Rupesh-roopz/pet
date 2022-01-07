@@ -27,7 +27,12 @@ const signUp = async(req, res) => {
                 }).then(async data => {
                     if (data)
                         return res.status(http.CONFLICT)
-                            .json({ message: 'user already exists' });
+                            .json({
+                                data: null,
+                                status: 1,
+                                error_message: null,
+                                success_message: 'user already exists'
+                            });
                     const newUser = await User.create({
                         firstName,
                         lastName,
@@ -39,7 +44,12 @@ const signUp = async(req, res) => {
                         password,
                         isAdmin
                     })
-                    res.status(http.CREATED).json({ newUser });
+                    res.status(http.CREATED).json({
+                        data: newUser,
+                        status: 1,
+                        error_message: null,
+                        success_message: "user signedup successfully"
+                    });
                 })
                 .catch(err => { throw err });
         }
@@ -47,7 +57,12 @@ const signUp = async(req, res) => {
 
     } catch (error) {
         console.log(error)
-        res.status(http.BAD_REQUEST).json(error);
+        res.status(http.BAD_REQUEST).json({
+            data: null,
+            status: 0,
+            error_message: error.message,
+            success_message: null
+        });
     }
 
 };
@@ -66,7 +81,10 @@ const signIn = async(req, res) => {
                 if (result === null)
                     return res.status(http.UNAUTHORISED)
                         .json({
-                            message: 'please enter valid credentials'
+                            data: null,
+                            status: 1,
+                            error_message: null,
+                            success_message: "please enter valid credentials"
                         });
                 const userPayload = {
                     id: result.id,
@@ -78,12 +96,22 @@ const signIn = async(req, res) => {
                     process.env.ACCESS_TOKEN_SECRET, { expiresIn: '30m' }
                 );
                 res.setHeader('Authorization', accessToken);
-                res.sendStatus(http.SUCCESS);
+                res.status(http.SUCCESS).json({
+                    data: null,
+                    status: 1,
+                    error_message: null,
+                    success_message: "login successfull"
+                });
             }).catch(err => { throw err });
         }
     } catch (error) {
         console.log(error)
-        res.status(http.BAD_REQUEST).json(error);
+        res.status(http.BAD_REQUEST).json({
+            data: null,
+            status: 0,
+            error_message: error.message,
+            success_message: null
+        });
     }
 
 };
@@ -117,16 +145,30 @@ const profileUpdate = async(req, res) => {
             }).then(data => {
                 if (data[0]) {
                     res.status(http.SUCCESS)
-                        .json({ message: 'Updated successfully' });
+                        .json({
+                            data: null,
+                            status: 1,
+                            error_message: null,
+                            success_message: 'Updated successfully'
+                        });
                     return;
                 }
-                throw ({
-                    errorMessage: 'not updated! values remains same'
-                });
+                res.status(http.SUCCESS)
+                    .json({
+                        data: null,
+                        status: 1,
+                        error_message: null,
+                        success_message: 'not updated values remain same'
+                    });
             }).catch(err => { throw err });
         }
     } catch (error) {
-        res.status(http.BAD_REQUEST).json(error);
+        res.status(http.BAD_REQUEST).json({
+            data: null,
+            status: 0,
+            error_message: error.message,
+            success_message: null
+        });
     }
 };
 

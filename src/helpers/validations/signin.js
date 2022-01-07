@@ -1,17 +1,17 @@
 const regex = require('../../constants/regex');
 
-const signinValidation = async (req) => {
-	const { email, password } = req;
-	const emailRegx = regex.EMAIL;
-    
-	if(email.trim() === '' || !(emailRegx.test(email))) {
-		throw ({ errorMessage : 'Please enter a valid Email' });
-	}
-	if(password.trim() === '') {
-		throw ({ errorMessage : 'Please enter password' });
-	}
+const signinValidation = async(req) => {
+    const { email, password } = req;
+    const emailRegx = regex.EMAIL;
 
-	return 1;
+    if (email.trim() === '' || !(emailRegx.test(email))) {
+        throw ({ message: 'Please enter a valid Email' });
+    }
+    if (password.trim() === '') {
+        throw ({ message: 'Please enter password' });
+    }
+
+    return 1;
 
 };
 

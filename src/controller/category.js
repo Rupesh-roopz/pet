@@ -16,16 +16,31 @@ const addCategory = async(req, res) => {
                 //if category exists throws error
                 if (data)
                     return res.status(http.CONFLICT)
-                        .json({ message: 'category already exists' });
+                        .json({
+                            data: null,
+                            status: 1,
+                            error_message: null,
+                            success_message: 'category already exists'
+                        });
                 const newCategory = await Category.create({ categoryName });
-                res.status(http.CREATED).json(newCategory);
+                res.status(http.CREATED).json({
+                    data: newCategory,
+                    status: 1,
+                    error_message: null,
+                    success_message: "new category added"
+                });
             }).catch((err) => { throw err });
         }
         return;
 
     } catch (error) {
         console.log(error)
-        res.status(http.BAD_REQUEST).json(error);
+        res.status(http.BAD_REQUEST).json({
+            data: null,
+            status: 0,
+            error_message: error.message,
+            success_message: null
+        });
     }
 };
 
@@ -33,11 +48,21 @@ const fetchCategories = async(req, res) => {
     try {
         await Category.findAll({})
             .then(data => {
-                res.status(http.SUCCESS).json(data);
+                res.status(http.SUCCESS).json({
+                    data: data,
+                    status: 1,
+                    error_message: null,
+                    success_message: "fetches all categories"
+                });
             }).catch(err => { throw err });
 
     } catch (error) {
-        res.status(http.BAD_REQUEST).json(error);
+        res.status(http.BAD_REQUEST).json({
+            data: null,
+            status: 0,
+            error_message: error.message,
+            success_message: null
+        });
     }
 };
 
@@ -56,15 +81,30 @@ const editCategory = async(req, res) => {
                 const [updatedCategory] = await Category.update({ categoryName }, { where: { id } });
                 if (updatedCategory) {
                     res.status(http.SUCCESS)
-                        .json({ message: 'Updated successfully' });
+                        .json({
+                            data: null,
+                            status: 1,
+                            error_message: null,
+                            success_message: "Updated successfully"
+                        });
                     return;
                 }
             }
             res.status(http.CONFLICT)
-                .json({ message: 'category already exists' });
+                .json({
+                    data: null,
+                    status: 1,
+                    error_message: null,
+                    success_message: "category already exists"
+                });
         }
     } catch (error) {
-        res.status(http.BAD_REQUEST).json({ error });
+        res.status(http.BAD_REQUEST).json({
+            data: null,
+            status: 0,
+            error_message: error.message,
+            success_message: null
+        });
     }
 }
 

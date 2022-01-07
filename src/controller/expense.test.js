@@ -41,28 +41,6 @@ describe.only('Expense data API', () => {
         expect(res.status).toBe(201)
     });
 
-    test('Total day expense', async() => {
-        const token = authorisedToken;
-        const res = await request(app)
-            .post('/expense/totalDayExpense')
-            .set('Authorization', 'bearer ' + token)
-            .send({
-                "date": "2022-01-01"
-            })
-        expect(res.status).toBe(200)
-    });
-
-    test('Total month expense', async() => {
-        const token = authorisedToken;
-        const res = await request(app)
-            .post('/expense/monthlyTotalExpense')
-            .set('Authorization', 'bearer ' + token)
-            .send({
-                "date": "2022-01-01"
-            })
-        expect(res.status).toBe(200)
-    });
-
     test('Edit expense', async() => {
         const token = authorisedToken;
         const res = await request(app)
@@ -78,6 +56,7 @@ describe.only('Expense data API', () => {
             })
         expect(res.status).toBe(201)
     });
+
     test('Fetch expense', async() => {
         const token = authorisedToken;
         const res = await request(app)
