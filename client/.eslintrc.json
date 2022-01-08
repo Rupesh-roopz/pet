@@ -1,0 +1,46 @@
+{
+    "env": {
+        "browser": true,
+        "es2021": true
+    },
+    
+    "extends": [
+        "eslint:recommended",
+        "plugin:react/recommended",
+        "plugin:@typescript-eslint/recommended"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "ecmaFeatures": {
+            "jsx": true
+        },
+        "ecmaVersion": 13,
+        "sourceType": "module"
+    },
+    "plugins": [
+        "react",
+        "@typescript-eslint"
+    ],
+    "rules": {
+        "require-jsdoc": ["error", {
+            "require": {
+                "FunctionDeclaration": false,
+                "MethodDefinition": false,
+                "ClassDeclaration": false,
+                "ArrowFunctionExpression": false,
+                "FunctionExpression": false
+            }
+        }],
+        "indent": ["error", 4],
+        "react/prop-types" : 0,
+        "react/react-in-jsx-scope": "off",
+        "linebreak-style": 0,
+        "new-cap" : "off",
+        "key-spacing": ["error", {
+            "beforeColon": true,
+            "afterColon": true
+        }],
+        "no-undef" : 0,
+        "object-curly-spacing" : ["error", "always"]
+    }
+}
