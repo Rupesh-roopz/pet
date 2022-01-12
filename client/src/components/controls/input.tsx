@@ -8,6 +8,7 @@ type InputProps = {
 	onChange : (e: React.ChangeEvent<HTMLInputElement>) => void
 
 }
+
 const Input = (props: InputProps) => {
 	const { id, label, value, onChange } = props;
 
@@ -20,6 +21,7 @@ const Input = (props: InputProps) => {
 			onChange={onChange}
 			margin='normal'
 			fullWidth
+			required
 		/>
 	);
 };
