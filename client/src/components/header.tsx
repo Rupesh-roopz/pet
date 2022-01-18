@@ -1,30 +1,36 @@
-import React from 'react';
+import * as React from 'react';
+import { useTheme } from '@mui/material/styles';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import MenuIcon from '@mui/icons-material/Menu';
+import AppBar from '@mui/material/AppBar';
 
-const Header = () => {
+const Header = (props: any) => {
+	const theme = useTheme();
 	return (
-		<div
-			style={{
+		<AppBar 
+			position="fixed" 
+			sx={{ [theme.breakpoints.up('xs')] : {
 				width : '100%',
-				background : 'linear-gradient(66deg, rgba(255,59,251,1) 5%, rgba(255,204,221,1) 49%, rgba(218,119,206,1) 94%)',
-				display : 'flex'
-			}}
+				height : '100px'
+			},
+			zIndex : theme.zIndex.drawer  }}
 		>
-			<h4 style={{ 
-				margin : 'auto 0',
-				fontFamily : 'Dancing Script', 
-				fontSize : '3.5rem', 
-				paddingLeft : '5%', 
-				paddingTop : '11px',
-				paddingBottom : '11px',
-				fontWeight : 'bold',
-				textShadow : '2px 2px #b5d4f7',
-				color : '#bf0bb6'
-			}}
-			>
-				Personal Expense Tracker
-			</h4>
-            
-		</div>
+			<Toolbar>
+				<IconButton
+					color="inherit"
+					aria-label="open drawer"
+					onClick={props.handleDrawerOpen}
+					edge="start"
+				>
+					<MenuIcon />
+				</IconButton>
+				<Typography variant="h6" noWrap component="div">
+            Personal Expense Tracker
+				</Typography>
+			</Toolbar>
+		</AppBar>
 	);
 };
 

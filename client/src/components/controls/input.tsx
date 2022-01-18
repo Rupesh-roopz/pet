@@ -6,7 +6,6 @@ type InputProps = {
 	label : string,
 	value : string,
 	onChange : (e: React.ChangeEvent<HTMLInputElement>) => void
-
 }
 
 const Input = (props: InputProps) => {
