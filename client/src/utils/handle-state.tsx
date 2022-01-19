@@ -7,10 +7,12 @@ type useFormProps = {
     profession ?: string;
     gender ?: string;
     phoneNumber ?: string;
-    email: string;
-    password: string;
+    email ?: string;
+    password ?: string;
     reEnterPassword ?: string;
     isAdmin ?: boolean | undefined;
+	monthlyIncome ?: number | undefined,
+	monthStartingDate ?: null
 
 }
 

@@ -22,29 +22,28 @@ import AppBar from '@mui/material/AppBar';
 import ManageExpense from '../components/manage-expense';
 import TrackExpense from '../components/track-expense';
 import Profile from '../components/profile';
+import { Outlet } from 'react-router-dom';
+import { Grid } from '@material-ui/core';
 const drawerWidth = 300;
 
 
 
   
-const Dashboard = () => {
-	const [open, setOpen] = React.useState(false);
-
-	const handleDrawerOpen = () => {
-		open ?
-			setOpen(false) : setOpen(true);
-	};
+const Home = () => {
 
 	return (
-		<Box sx={{ display : 'flex', height : '100vh' }}>
-			<CssBaseline />
-			<Header handleDrawerOpen={handleDrawerOpen}/>
-			<SideNav open={open}/>
-			
-			<Main open={open} />
-				
-		</Box>
+		<Grid container>
+			<Grid item xs={12}>
+				<Header />	
+			</Grid>	
+			<Grid item xs={2}>
+				<SideNav />
+			</Grid>	
+			<Grid item xs={10}>
+				<Main />
+			</Grid>			
+		</Grid>
 	);
 };
 
-export default Dashboard;
+export default Home;

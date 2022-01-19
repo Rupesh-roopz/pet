@@ -1,31 +1,12 @@
-/* eslint-disable no-mixed-spaces-and-tabs */
+import Box from '@mui/material/Box';
 import React from 'react';
-import { styled } from '@mui/material/styles';
-
-const drawerWidth = 300;
-const Mains = styled('main', { shouldForwardProp : (prop) => prop !== 'open' })<{
-    open?: boolean;
-  }>(({ theme, open }) => ({
-  	flexGrow : 1,
-  	padding : theme.spacing(3),
-  	transition : theme.transitions.create('margin', {
-  		easing : theme.transitions.easing.sharp,
-  		duration : theme.transitions.duration.leavingScreen,
-  	}),
-  	marginLeft : `-${drawerWidth}px`,
-  	...(open && {
-  		transition : theme.transitions.create('margin', {
-  			easing : theme.transitions.easing.easeOut,
-  			duration : theme.transitions.duration.enteringScreen,
-  		}),
-  		marginLeft : 0,
-  	}),
-  }));
+import { Outlet } from 'react-router-dom';
   
 const Main = (props: any) => {
-	return <Mains open={props.open} sx={{ marginTop : '100px', backgroundColor : 'lightskyblue' }}>
-        hello     
-	</Mains>;
+	return (
+		<Box sx={{ width : '100%',height : '90vh',background : 'linear-gradient(66deg, rgba(198,184,245,1) 20%, rgba(241,154,242,1) 42%, rgba(119,201,218,1) 100%)' }}> 
+			<Outlet />
+		</Box>);
 };
 
 export default Main;

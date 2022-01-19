@@ -45,6 +45,7 @@ const SignUp = () => {
 		{ id : 'female', title : 'Female' },
 		
 	];
+
 	const { values, handleInputChange } = handleState(initialValues);
 	console.log(values);
 
@@ -77,7 +78,7 @@ const SignUp = () => {
 					<Input 
 						id = "email" 
 						label = "Email" 		
-						value = {values.email}
+						value = {values.email!}
 						onChange = {handleInputChange}
 					/>
 				</Grid>

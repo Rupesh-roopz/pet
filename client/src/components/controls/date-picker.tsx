@@ -27,21 +27,10 @@ const DatePicker = (props: DatePickerProps) =>{
 				value={value}
 				onChange={onChange}
 				required
+				margin='normal'
 				// animateYearScrolling
 				
 			/>
-			{/* <MUIDatePicker
-				id={id}
-				fullWidth
-				onChange={onChange}
-				value={value}
-				label={label}
-				format="dd / MM / yyyy"
-				margin="normal"
-				// maxDate={new Date()}
-				// emptyLabel="custom label" //<--- custom placeholder when date is null
-				//  InputProps={{ className: css.datepicker }}
-			/> */}
 		</MuiPickersUtilsProvider>
 	);
 };

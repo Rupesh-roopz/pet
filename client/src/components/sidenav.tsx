@@ -14,6 +14,10 @@ import Header from './header';
 import AppBar from '@mui/material/AppBar';
 import SideNavButton from './sidenav-button';
 import { Navigate, useNavigate } from 'react-router-dom';
+import { ListItemButton } from '@mui/material';
+import { Box } from '@material-ui/core';
+import DraftsIcon from '@mui/icons-material/Drafts';
+
 const drawerWidth = 300;
 
 const SideNav = (props: any) => {
@@ -21,42 +25,36 @@ const SideNav = (props: any) => {
 
 	const sideNavItems = [
 		{
+			item : 'Dashboard',
+			onClick : () => navigate('/home')
+		},
+		{
 			item : 'Manage Expense',
-			onClick : () => navigate('/manage-expense')
+			onClick : () => navigate('/home/manage-expense')
 		},{
 			item : 'Track Expense',
-			onClick : () => navigate('/track-expense')
+			onClick : () => navigate('/home/track-expense')
 		},{
 			item : 'Profile',
-			onClick : () => navigate('/profile')
+			onClick : () => navigate('/home/profile')
 		}
 	];
 	return (
-		<Drawer
-			sx={{
-				width : drawerWidth,
-				flexShrink : 0,
-				'& .MuiDrawer-paper' : {
-					width : drawerWidth,
-					boxSizing : 'border-box',
-					marginTop : '100px'
-				},
-			}}
-			variant="persistent"
-			anchor="left"
-			open={props.open}
-		>
-			<Divider />
-			<List>
-				{sideNavItems.map(sideNav => (
-					<ListItem button key={sideNav.item}>
-						<ListItemText>
-							<SideNavButton item = {sideNav.item} onClick={sideNav.onClick}/>
-						</ListItemText>
-					</ListItem>
-				))}
-			</List>
-		</Drawer>
+		<Box sx={{ width : '100%',height : '90vh', bgcolor : 'background.paper' }}>
+			<nav aria-label="main mailbox folders">
+				<List>
+					{sideNavItems.map(sideNav => (
+						<ListItem key={sideNav.item} onClick={sideNav.onClick}>
+							<ListItemButton>
+								<ListItemText>
+									<SideNavButton item = {sideNav.item} />
+								</ListItemText>
+							</ListItemButton>
+						</ListItem>
+					))}
+				</List>
+			</nav>
+		</Box>
 	);
 };
 

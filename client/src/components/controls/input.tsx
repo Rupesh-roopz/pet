@@ -4,7 +4,7 @@ import React from 'react';
 type InputProps = {
 	id:string,
 	label : string,
-	value : string,
+	value : string | number,
 	onChange : (e: React.ChangeEvent<HTMLInputElement>) => void
 }
 

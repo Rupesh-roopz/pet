@@ -24,7 +24,7 @@ const SignIn = () => {
 					<Input 
 						id = "email" 
 						label = "Email"
-						value = {values.email}
+						value = {values.email!}
 						onChange = {handleInputChange}
 					/>
 				</Grid>
@@ -32,7 +32,7 @@ const SignIn = () => {
 					<Input 
 						id = "password" 
 						label = "Password" 		
-						value = {values.password}
+						value = {values.password!}
 						onChange = {handleInputChange}
 					/>
 				</Grid>

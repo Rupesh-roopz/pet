@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button as MuiButton, makeStyles } from '@material-ui/core';
+import { Button as MuiButton, makeStyles, Typography } from '@material-ui/core';
 
 type ButtonProp = {
 	size: 'small' | 'large' | 'medium';
@@ -36,7 +36,9 @@ const Button = (props: ButtonProp) => {
 
 			// classes={{ root : classes.root, label : classes.label }}
 		>
-			{text}
+			<Typography variant='button' gutterBottom>
+				{text}
+			</Typography>
 		</MuiButton>
 	);
 };
